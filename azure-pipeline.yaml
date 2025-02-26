@@ -1,23 +1,17 @@
 ---
 name: "Spring-petclinic-CI"
 pool:
-  vmImage: "ubuntu-24.04"
+  name: Default
 
 trigger: none
 
 pr:
   - main
-
-parameters:
-  - name: "javaversion"
-    type: string
-    default: 1.17
-    values:
-      - '1.17'
-      - '1.11'
-      - '1.10'
-      - '1.9'
-      - '1.8'
+variables:
+  - name: java_Home
+    value: /usr/lib/jvm/java-17-openjdk-amd64
+  - name: maven_Home
+    value: /opt/apache-maven-3.9.9
 
 stages:
   - stage: CI
@@ -30,11 +24,14 @@ stages:
             inputs:
               mavenPOMFile: pom.xml
               goals: clean package
+              mavenVersionOption: path
+              mavenDirectory: ${{ variables.maven_Home }}
+              mavenSetM2Home: true
+              javaHomeOption: path
+              jdkDirectory: ${{ variables.java_Home }}
               publishJUnitResults: true
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
               testRunTitle: 'spc_test'
-              javaHomeOption: 'JDKVersion'
-              jdkVersionOption: "${{ parameters.javaversion }}"
 
           - task: CopyFiles@2
             inputs:
